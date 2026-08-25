@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "Si usás este trabajo, citá el informe y el repositorio."
+type: software
+title: "E-OVRT-VDP — Plataforma experimental de detección open-vocabulary en video en tiempo real para monitoreo asistivo de riesgos en construcción"
+authors:
+  - family-names: Carrizo
+    given-names: Matías Lautaro
+  - family-names: Guillaumet
+    given-names: Gabriel Agustín
+  - family-names: Llamosas
+    given-names: Simon
+contact:
+  - family-names: Llamosas
+    given-names: Simon
+repository-code: "https://github.com/simonll4/e-ovrt-vdp"
+url: "https://github.com/simonll4/e-ovrt-vdp"
+license: CC-BY-4.0
+date-released: "2026-09-01"
+version: "1.0"
+keywords:
+  - open-vocabulary detection
+  - construction safety
+  - PPE
+  - Grounding DINO
+  - real-time video
+abstract: "Proyecto Integrador de Ingeniería en Informática (IUA Córdoba, Facultad de Ingeniería, 2026). Tutor: Mariano García Mattio. Plataforma experimental que aplica detección open-vocabulary sin entrenamiento a la detección asistiva de riesgos en obra (CR-01 sin casco, CR-02 sin chaleco), con motor de patrones temporal, bus de eventos, distribución MQTT y una consola para experimentos reproducibles; incluye la medición completa sobre bancos con referencia humana."

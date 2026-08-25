@@ -1,0 +1,10 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+# nunca binarios pesados (spec §3 regla 3)
+*.mp4
+*.mov
+*.docx
+*.pt
+*.pth
