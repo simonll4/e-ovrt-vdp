@@ -51,15 +51,15 @@ configuraciones usan rutas relativas entre ellos (`../e-ovrt_datasets/...`).
 - Tests: `python3 -m pytest datasets/tests/ -q`.
 
 ## Versiones citadas en el informe
-Se completa al congelar (tag `informe-2026` en cada repo). Hasta entonces, la rama de trabajo
-es la rama por defecto en GitHub en `e-ovrt_media-plane` y `e-ovrt_experimental-setup` (los
-enlaces `blob/HEAD/` resuelven a ella); en `e-ovrt_datasets` y `e-ovrt_control-plane` los
-enlaces de este repositorio apuntan a la rama de trabajo por nombre.
+Se completa al congelar (tag `informe-2026` en cada repo). Desde el 2026-09-18 **los cinco
+repositorios tienen todo el trabajo integrado en `main`, que es además su rama por defecto en
+GitHub**, así que tanto los enlaces `blob/HEAD/` como los que nombran la rama resuelven al mismo
+contenido. Las ramas de trabajo se conservan como historia y ya no reciben commits.
 
-| Repositorio | Rama de trabajo | Tag | Commit | Fecha |
+| Repositorio | Rama | Tag | Commit | Fecha |
 |---|---|---|---|---|
-| e-ovrt_media-plane | `feature/inference-service` | `informe-2026` | *(al congelar)* | |
-| e-ovrt_control-plane | `feature/control-service` | `informe-2026` | | |
+| e-ovrt_media-plane | `main` | `informe-2026` | *(al congelar)* | |
+| e-ovrt_control-plane | `main` | `informe-2026` | | |
 | e-ovrt_alert-distribution | `main` | `informe-2026` | | |
-| e-ovrt_experimental-setup | `feature/webconsole-adopcion-front-design` | `informe-2026` | | |
-| e-ovrt_datasets | `feature/datasets-v2-setup` | `informe-2026` | | |
+| e-ovrt_experimental-setup | `main` | `informe-2026` | | |
+| e-ovrt_datasets | `main` | `informe-2026` | | |

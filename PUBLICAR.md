@@ -13,12 +13,12 @@ Todo lo de acá lo ejecuta el autor: git, GitHub, licencias y el PDF. Nada lo ha
        (o `gitleaks detect` si está instalado).
 3. [ ] **Coherencia de READMEs.** El primer párrafo del `README.md` de cada repo dice lo mismo
        que su ficha en `repositorios/README.md`.
-4. [~] **Rama por defecto.** *(2026-09-12: hecho en `e-ovrt_experimental-setup` →
-       `feature/webconsole-adopcion-front-design` y en `e-ovrt_media-plane` → `feature/inference-service`;
-       en `e-ovrt_datasets` y `e-ovrt_control-plane` lo tiene que hacer Pandulc, dueño de los repos —
-       mientras tanto `evidencia/mapa-de-artefactos.md` enlaza por nombre de rama.)* Los enlaces de este repo usan `blob/HEAD/` (= rama por defecto en
-       GitHub). Antes de publicar, la rama por defecto de `e-ovrt_experimental-setup` tiene que
-       contener `results/` y `finetuning/manifests/` tal como se enlazan.
+4. [x] **Rama por defecto.** *(2026-09-18: RESUELTO. Los cinco repositorios de código tienen el
+       trabajo integrado en `main` por fast-forward, y `main` es su rama por defecto en GitHub.
+       `evidencia/mapa-de-artefactos.md` dejó de enlazar por nombre de rama y apunta a `main`.)*
+       Los enlaces de este repo usan `blob/HEAD/` (= rama por defecto en GitHub), que ahora
+       resuelve a `main` en todos. `e-ovrt_experimental-setup` contiene `results/` y
+       `finetuning/manifests/` en `main`, tal como se enlazan.
 5. [ ] **Crear el repo** `simonll4/e-ovrt-vdp` en GitHub, público. Descripción:
        *Plataforma experimental de detección open-vocabulary en video en tiempo real para
        monitoreo asistivo de riesgos en construcción — Proyecto Integrador, Ingeniería en
