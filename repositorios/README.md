@@ -51,12 +51,15 @@ configuraciones usan rutas relativas entre ellos (`../e-ovrt_datasets/...`).
 - Tests: `python3 -m pytest datasets/tests/ -q`.
 
 ## Versiones citadas en el informe
-Se completa al congelar (tag `informe-2026` en cada repo).
+Se completa al congelar (tag `informe-2026` en cada repo). Hasta entonces, la rama de trabajo
+es la rama por defecto en GitHub en `e-ovrt_media-plane` y `e-ovrt_experimental-setup` (los
+enlaces `blob/HEAD/` resuelven a ella); en `e-ovrt_datasets` y `e-ovrt_control-plane` los
+enlaces de este repositorio apuntan a la rama de trabajo por nombre.
 
 | Repositorio | Rama de trabajo | Tag | Commit | Fecha |
 |---|---|---|---|---|
 | e-ovrt_media-plane | `feature/inference-service` | `informe-2026` | *(al congelar)* | |
 | e-ovrt_control-plane | `feature/control-service` | `informe-2026` | | |
 | e-ovrt_alert-distribution | `main` | `informe-2026` | | |
-| e-ovrt_experimental-setup | `feature/webconsole-consola-tesis` | `informe-2026` | | |
+| e-ovrt_experimental-setup | `feature/webconsole-adopcion-front-design` | `informe-2026` | | |
 | e-ovrt_datasets | `feature/datasets-v2-setup` | `informe-2026` | | |

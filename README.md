@@ -46,6 +46,8 @@ completa en
 | ver los resultados con su fuente | [`resultados/`](resultados/README.md) |
 | ir al código | [`repositorios/`](repositorios/README.md) |
 | ver la plataforma funcionando | [`evidencia/consola/`](evidencia/consola/README.md) y las [figuras](evidencia/figuras/README.md) |
+| encontrar cada artefacto que el informe identifica (Anexo E) | [`evidencia/mapa-de-artefactos.md`](evidencia/mapa-de-artefactos.md) |
+| acceder al material audiovisual y a la evidencia cruda | [acceso autorizado](#material-audiovisual-y-evidencia-cruda-acceso-autorizado) |
 
 ## Los cinco repositorios de código
 
@@ -56,6 +58,15 @@ completa en
 | [e-ovrt_alert-distribution](https://github.com/simonll4/e-ovrt_alert-distribution) | distribución de alertas confirmadas por MQTT QoS 1 con idempotencia | `:8082` |
 | [e-ovrt_experimental-setup](https://github.com/simonll4/e-ovrt_experimental-setup) | prompts, manifiestos de experimento, **resultados**, consola web, deploy integral, fine-tuning | consola `:8090` |
 | [e-ovrt_datasets](https://github.com/Pandulc/e-ovrt_datasets) | adquisición, conversión y curación de datasets; el banco de imágenes `bench_v3` | — |
+
+## Material audiovisual y evidencia cruda: acceso autorizado
+
+No se publica ningún video ni imagen original. Los clips del rodaje propio, los recortes del
+lote de obra real, las carpetas de corrida con sus artefactos primarios y los pesos de la rama
+de ajuste fino se conservan en una **carpeta de evidencia con acceso autorizado**. El enlace se
+publica acá al cierre de la entrega; el acceso se solicita a los autores (contacto en
+[`CITATION.cff`](CITATION.cff)). Qué hay en esa carpeta y qué está en los repositorios:
+[`evidencia/mapa-de-artefactos.md`](evidencia/mapa-de-artefactos.md).
 
 ## Cómo citar
 

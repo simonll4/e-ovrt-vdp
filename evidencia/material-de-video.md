@@ -1,7 +1,8 @@
 # Material de video: qué se usó y qué se publica
 
 **No se publica ningún video en este repositorio.** El material de obra propia no se
-redistribuye; el de internet se referencia a su origen.
+redistribuye; el de internet se referencia a su origen. Los clips se conservan en una
+carpeta de evidencia con acceso autorizado: ver [`mapa-de-artefactos.md`](mapa-de-artefactos.md) §4.
 
 ## Rodaje propio (34 clips, no publicados)
 
