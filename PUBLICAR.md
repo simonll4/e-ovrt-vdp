@@ -2,10 +2,17 @@
 
 Todo lo de acá lo ejecuta el autor: git, GitHub, licencias y el PDF. Nada lo hace un agente.
 
-1. [ ] **Licencias.** Decidir con los coautores: paraguas CC BY 4.0 (ya en `LICENSE`; si es la
-       versión corta, reemplazar por el texto legal de
-       https://creativecommons.org/licenses/by/4.0/legalcode.txt) y MIT para los 5 repos de
-       código. Agregar `LICENSE` a cada repo de código.
+1. [x] **Licencias.** *(2026-09-18: aplicado. Paraguas **CC BY 4.0**, con el texto legal completo
+       —8 secciones, 396 líneas—, así que la salvedad de la versión corta ya no aplica. Los cinco
+       repos de código tienen **MIT** en su propio `LICENSE`, con el copyright a nombre de los tres
+       autores del `CITATION.cff`. Dos repos llevan además una nota en su README porque la licencia
+       propia no alcanza a todo lo que distribuyen: `e-ovrt_datasets`, donde cada conjunto de datos
+       de terceros conserva la suya —registro en `datasets/registry/license_registry.md`—, y
+       `e-ovrt_media-plane`, cuya dependencia de inferencia de YOLOE es **AGPL-3.0** y obliga a un
+       despliegue derivado a publicar su código bajo la misma licencia o a licenciarla
+       comercialmente.)*
+       **Queda del autor confirmar la elección con los coautores**; los archivos ya están puestos
+       y un cambio de licencia es un commit.
 2. [ ] **Barrido de secretos** en la historia de los 5 repos antes de hacerlos públicos.
        Verificado el 2026-08-25: `cameras/` nunca fue commiteado; el `.env` histórico de
        `infra/platform` sólo contenía `EOVRT_WORKSPACE` y `COMPOSE_PROFILES`. Como constancia,
