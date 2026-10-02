@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
-"""FIG-F — Frontera de juzgabilidad: escala × iluminación × oclusión (§17.5).
+"""FIG-F — Frontera de juzgabilidad: escala × iluminación × oclusión.
 
-Qué muestra: dónde el material deja de ser evaluable por la plataforma, y por qué la
-respuesta NO se reduce a "sujetos chicos". Dos paneles que comparten lenguaje de color:
+Qué muestra: dónde el material de obra real deja de ser evaluable por la plataforma,
+y por qué la respuesta NO se reduce a "sujetos chicos". Dos paneles:
 
-  Panel A — asociación de chaleco a cada `person` detectado, por banda de altura del
-  sujeto. Cruza los dos primeros ejes: la asociación crece con la escala (eje 1) pero
-  de noche colapsa a cualquier tamaño (eje 2). Es la medición sobre las detecciones
-  crudas de la campaña I1 del lote de internet.
+  Panel A — mapa de calor: asociación de chaleco a cada `person` detectado, por clip y
+  por banda de altura del sujeto, sobre las detecciones crudas de la campaña del lote
+  de internet. Cruza los dos primeros ejes: la asociación crece con la escala, pero de
+  noche colapsa a casi cualquier tamaño. Al costado, la referencia del rodaje propio.
+  Una celda sin medir se dibuja vacía, nunca como cero.
 
-  Panel B — F1 de CR-02 contra altura mediana del sujeto, un punto por clip con GT
-  humano y Nivel A medido. Aquí aparece el tercer eje: el clip de sujetos MÁS grandes
-  del conjunto rinde F1 0,084 porque es una cuadrilla apiñada con 58,5 % de personas
-  solapadas. La escala sola no ordena el resultado.
+  Panel B — F1 de CR-02 a Nivel A contra la altura mediana del sujeto, un punto por
+  clip. Aparece el tercer eje: el clip de sujetos MÁS grandes rinde F1 0,084 porque
+  es una cuadrilla apiñada con 58,5 % de personas solapadas. Tres de los cuatro clips
+  son del piloto de 12 s (anotados, con Nivel A medido, pero fuera del banco temporal);
+  `v06_c01` es del banco.
 
-Las cifras van embebidas porque su fuente son tablas de documentos operativos
-verificados —no hay `metrics.json` con la asociación por banda—; cada bloque declara
-su documento de origen y la nota al pie de la figura lo repite.
+Las cifras van embebidas porque su fuente son tablas de análisis verificadas —no hay
+`metrics.json` con la asociación por banda—. El Nivel A por clip está publicado en
+`results/bench_nivel_a/index.md`.
 
 Uso:
     python3 fig_f_frontera_juzgabilidad.py  (requiere matplotlib; ver README del directorio)
@@ -28,199 +30,141 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from estilo import (  # noqa: E402  — fija el backend Agg antes de importar pyplot
-    ANCHO_COLUMNA_IN,
-    AQUA,
-    AZUL,
-    BANDA,
-    NARANJA,
-    SUPERFICIE,
-    TINTA,
-    TINTA_2,
-    TINTA_3,
-    aplicar_estilo,
-    guardar,
-    limpiar_ejes,
-    nota_al_pie,
-)
+from estilo import ANCHO_IN, MONO, coma, generar, rampa  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.colors import to_rgb  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
+from matplotlib.patches import FancyBboxPatch  # noqa: E402
 
 SALIDA = Path(__file__).resolve().parents[1] / "fig-f-frontera-juzgabilidad"
 
-# --- Panel A -------------------------------------------------------------------
+# --- Panel A ---------------------------------------------------------------------
 # Asociación de `vest` a cada detección `person` (proxy: centro del vest dentro del
-# torso), sobre las detecciones crudas de la campaña I1. El "—" del original es dato
-# ausente, no cero: se corta la serie, nunca se dibuja como 0.
+# torso). `None` es dato ausente: el tramo ≥320 px de v10 no se midió.
 BANDAS = ["<80", "80–120", "120–160", "160–220", "220–320", "≥320"]
-CENTROS = [1, 2, 3, 4, 5, 6]
-
-ASOCIACION = {
-    "v06 · diurno": {
-        "valores": [0.0, 10.8, 16.8, 57.0, 73.2, 41.4],
-        "color": AZUL,
-        "marcador": "o",
-        "etiqueta_offset": (7, -6),
-    },
-    "v10 · diurno": {
-        "valores": [0.0, 9.1, 14.1, 51.9, 62.9, None],
-        "color": AQUA,  # contraste 2,74: exige la etiqueta directa que se dibuja abajo
-        "marcador": "^",
-        "etiqueta_offset": (-30, 26),  # arriba-izquierda: a la derecha se monta sobre la curva de v06
-    },
-    "v04 · nocturno": {
-        "valores": [0.0, 0.0, 6.1, 8.7, 13.2, 55.1],
-        "color": NARANJA,
-        "marcador": "s",
-        "etiqueta_offset": (7, 6),
-    },
-}
-
+ASOCIACION = [
+    ("v06", "diurno", [0.0, 10.8, 16.8, 57.0, 73.2, 41.4]),
+    ("v10", "diurno", [0.0, 9.1, 14.1, 51.9, 62.9, None]),
+    ("v04", "nocturno", [0.0, 0.0, 6.1, 8.7, 13.2, 55.1]),
+]
 # Régimen donde el rodaje validó la plataforma: mediana de altura 716–839 px y
 # asociación 96–100 % (mismo modelo y clases, campaña T1).
 RODAJE_ASOCIACION = (96, 100)
+RODAJE_ALTURA = "716–839 px"
 
-# --- Panel B -------------------------------------------------------------------
-# Los clips con GT humano y Nivel A medido. `oclusion` sólo está medida donde la
-# fuente la reporta; `None` = no medida, y así se declara.
+# --- Panel B ---------------------------------------------------------------------
+# (clip, altura mediana px, F1 CR-02, del piloto de 12 s, nota, posición de la nota)
 CLIPS = [
-    # (etiqueta, altura mediana px, F1 CR-02, oclusión medida, nota, desplazamiento
-    #  de la nota en puntos). Las notas se ubican a mano: con cuatro puntos y dos de
-    #  ellos casi superpuestos en x, un desplazamiento uniforme produce choques.
-    ("video15_clip01", 173, 0.381, None, "mejor del conjunto:\n0 % no observable para el humano", (14, -4)),
-    ("video16_clip10", 178, 0.080, None, None, None),
-    ("v06_c01", 211, 0.002, None, None, None),
-    ("video02_clip07", 370, 0.084, 58.5, "sujetos MÁS grandes del conjunto,\npero 58,5 % de personas solapadas", (-8, -6)),
+    ("video15_clip01", 173, 0.381, True, "el mejor: 0 % de estados\nno observables", (14, -2)),
+    ("video16_clip10", 178, 0.080, True, None, None),
+    ("v06_c01", 211, 0.002, False, None, None),
+    ("video02_clip07", 370, 0.084, True, "los sujetos más grandes,\npero 58,5 % de personas\nsolapadas", (-14, 40)),
 ]
+DESTACADO = "video02_clip07"
 
 
-def main() -> int:
-    aplicar_estilo()
-    # Paneles apilados, no lado a lado: en el ancho de columna del informe (16 cm) dos
-    # paneles dejan a las etiquetas de banda del panel A montadas unas sobre otras.
-    fig, (ax_a, ax_b) = plt.subplots(
-        2, 1, figsize=(ANCHO_COLUMNA_IN, 5.6), gridspec_kw={"height_ratios": [1.25, 1]}
-    )
+def luminancia(color) -> float:
+    r, g, b = to_rgb(color)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
 
-    # ---------------- Panel A: escala × iluminación ----------------
-    ax_a.axhspan(RODAJE_ASOCIACION[0], RODAJE_ASOCIACION[1] + 4, color=BANDA, zorder=0, lw=0)
-    ax_a.text(
-        6.42,
-        RODAJE_ASOCIACION[0] + 2,
-        "régimen donde el rodaje validó la plataforma (96–100 %)",
-        ha="right",
-        va="center",
-        fontsize=6.8,
-        color=TINTA_3,
-    )
 
-    for etiqueta, cfg in ASOCIACION.items():
-        xs = [c for c, v in zip(CENTROS, cfg["valores"]) if v is not None]
-        ys = [v for v in cfg["valores"] if v is not None]
-        ax_a.plot(
-            xs,
-            ys,
-            color=cfg["color"],
-            marker=cfg["marcador"],
-            markersize=5,
-            markeredgecolor=SUPERFICIE,
-            markeredgewidth=1.2,
-            label=etiqueta,
-            zorder=3,
-        )
-        # Etiqueta directa para cada serie (obligatoria por la regla de relieve del
-        # slot aqua, y aplicada a las tres para que el panel se lea sin la leyenda).
-        ax_a.annotate(
-            etiqueta.replace(" · ", "\n"),
-            xy=(xs[-1], ys[-1]),
-            xytext=cfg["etiqueta_offset"],
-            textcoords="offset points",
-            fontsize=6.8,
-            color=cfg["color"],
-            va="center",
-            linespacing=1.3,
-        )
+def celda(ax, x, y, valor, t, tema, *, ancho=1.0, alto=1.0, texto=None):
+    cmap = rampa(tema)
+    if valor is None:
+        ax.add_patch(FancyBboxPatch((x + 0.04, y + 0.04), ancho - 0.08, alto - 0.08,
+                                    boxstyle="round,pad=0,rounding_size=0.08", facecolor="none",
+                                    edgecolor=t["grilla"], linewidth=1.2, zorder=2))
+        ax.text(x + ancho / 2, y + alto / 2, "sin medir", ha="center", va="center", fontsize=9,
+                color=t["tinta_3"], zorder=3)
+        return
+    color = cmap(min(valor, 100) / 100)
+    ax.add_patch(FancyBboxPatch((x + 0.04, y + 0.04), ancho - 0.08, alto - 0.08,
+                                boxstyle="round,pad=0,rounding_size=0.08", facecolor=color,
+                                edgecolor="none", zorder=2))
+    claro = luminancia(color) > 0.5
+    ax.text(x + ancho / 2, y + alto / 2, texto or f"{coma(valor, 1)} %", ha="center", va="center",
+            fontsize=10, color="#1f2328" if claro else "#ffffff", zorder=3)
 
-    ax_a.set_xticks(CENTROS)
-    ax_a.set_xticklabels(BANDAS, fontsize=7.5)
-    ax_a.set_xlim(0.6, 6.9)
-    ax_a.set_ylim(0, 105)
-    ax_a.set_yticks([0, 25, 50, 75, 100])
-    ax_a.set_yticklabels(["0", "25", "50", "75", "100 %"])
-    ax_a.set_xlabel("altura del sujeto (px a 1080p)", fontsize=8)
-    ax_a.set_ylabel("chaleco asociado al sujeto detectado", fontsize=8)
-    ax_a.grid(axis="x", visible=False)
-    limpiar_ejes(ax_a)
-    ax_a.set_title("A · escala e iluminación", loc="left", fontsize=8.5, pad=7, color=TINTA)
 
-    # ---------------- Panel B: el tercer eje ----------------
-    for etiqueta, altura, f1, oclusion, nota, desplazamiento in CLIPS:
-        destacado = oclusion is not None
-        color = NARANJA if destacado else AZUL
-        ax_b.scatter(
-            [altura],
-            [f1],
-            s=68 if destacado else 46,
-            color=color,
-            edgecolor=SUPERFICIE,
-            linewidth=1.4,
-            zorder=3,
-        )
-        ax_b.annotate(
-            etiqueta,
-            xy=(altura, f1),
-            xytext=(0, 10),
-            textcoords="offset points",
-            ha="center",
-            fontsize=7,
-            color=TINTA_2,
-        )
+def dibujar(t, tema):
+    fig = plt.figure(figsize=(ANCHO_IN, 4.6))
+
+    # ---------------- Panel A ----------------
+    ax = fig.add_axes([0.085, 0.20, 0.47, 0.60])
+    ax.set_xlim(0, len(BANDAS) + 1.65)
+    ax.set_ylim(0, len(ASOCIACION))
+    ax.axis("off")
+    for fila, (clip, momento, valores) in enumerate(ASOCIACION):
+        y = len(ASOCIACION) - 1 - fila
+        for col, valor in enumerate(valores):
+            celda(ax, col, y, valor, t, tema)
+        ax.text(-0.15, y + 0.62, clip, ha="right", va="center", fontsize=10.5, family=MONO, color=t["tinta"])
+        ax.text(-0.15, y + 0.32, momento, ha="right", va="center", fontsize=9.5,
+                color=t["tinta"] if momento == "nocturno" else t["tinta_2"],
+                fontweight="bold" if momento == "nocturno" else "normal")
+    for col, banda in enumerate(BANDAS):
+        ax.text(col + 0.5, -0.18, banda, ha="center", va="top", fontsize=9.5, color=t["tinta_2"])
+    ax.text(len(BANDAS) / 2, -0.62, "altura del sujeto (px, a 1080p)", ha="center", va="top", fontsize=10,
+            color=t["tinta_2"])
+    # Referencia del rodaje propio, separada: otro material, otra escala.
+    x_ref, ancho_ref = len(BANDAS) + 0.35, 1.3
+    celda(ax, x_ref, 0, sum(RODAJE_ASOCIACION) / 2, t, tema, ancho=ancho_ref, alto=len(ASOCIACION),
+          texto=f"{RODAJE_ASOCIACION[0]}–{RODAJE_ASOCIACION[1]} %")
+    ax.text(x_ref + ancho_ref / 2, -0.18, "rodaje\npropio", ha="center", va="top", fontsize=9.5,
+            color=t["tinta_2"], linespacing=1.2)
+    ax.text(x_ref + ancho_ref / 2, len(ASOCIACION) + 0.12, RODAJE_ALTURA, ha="center", va="bottom",
+            fontsize=9, color=t["tinta_3"])
+    fig.text(0.015, 0.93, "A · chaleco asociado a la persona detectada", fontsize=11.5, fontweight="bold",
+             color=t["tinta"], va="center")
+
+    # ---------------- Panel B ----------------
+    bx = fig.add_axes([0.665, 0.20, 0.32, 0.60])
+    bx.set_xlim(140, 400)
+    bx.set_ylim(-0.02, 0.45)
+    bx.set_xticks([160, 220, 280, 340, 400])
+    bx.set_yticks([0.0, 0.1, 0.2, 0.3, 0.4])
+    bx.set_yticklabels(["0", "0,1", "0,2", "0,3", "0,4"])
+    bx.grid(axis="y", color=t["grilla"], linewidth=1.0)
+    for lado in ("top", "right", "left"):
+        bx.spines[lado].set_visible(False)
+    bx.spines["bottom"].set_color(t["grilla"])
+    bx.tick_params(length=0, pad=6)
+    bx.set_xlabel("altura mediana del sujeto (px)", fontsize=10, color=t["tinta_2"], labelpad=8)
+    bx.set_ylabel("F1 de CR-02 (Nivel A)", fontsize=10, color=t["tinta_2"], labelpad=8)
+    for clip, altura, f1, piloto, nota, desplazamiento in CLIPS:
+        destacado = clip == DESTACADO
+        color = t["sujeto"] if destacado else t["tinta_2"]
+        bx.plot(altura, f1, "o", markersize=10 if destacado else 9,
+                markerfacecolor="none" if piloto else color, markeredgecolor=color,
+                markeredgewidth=2.0, zorder=3)
+        # Los dos clips pegados al borde izquierdo llevan el rótulo hacia la derecha:
+        # centrado, se monta sobre los números del eje.
+        # El destacado lo lleva debajo: arriba le llega la línea guía de su nota.
+        a_la_derecha = altura < 200
+        if destacado:
+            xy_rotulo, ha_rotulo, va_rotulo = (0, -12), "center", "top"
+        else:
+            xy_rotulo, ha_rotulo, va_rotulo = ((8, 9), "left", "baseline") if a_la_derecha else ((0, 11), "center", "baseline")
+        bx.annotate(clip, (altura, f1), xytext=xy_rotulo, textcoords="offset points", ha=ha_rotulo, va=va_rotulo,
+                    fontsize=9, family=MONO, color=t["tinta"])
         if nota:
-            dx, dy = desplazamiento
-            ax_b.annotate(
-                nota,
-                xy=(altura, f1),
-                xytext=(dx, dy),
-                textcoords="offset points",
-                ha="left" if dx > 0 else "right",
-                va="center" if dy == 0 else "top",
-                fontsize=6.8,
-                color=color if destacado else TINTA_3,
-                linespacing=1.4,
-            )
-
-    ax_b.set_xlim(140, 470)
-    ax_b.set_ylim(-0.02, 0.52)
-    ax_b.set_xticks([160, 220, 280, 340, 400])
-    ax_b.set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5])
-    ax_b.set_yticklabels(["0", "0,1", "0,2", "0,3", "0,4", "0,5"])
-    ax_b.set_xlabel("altura mediana del sujeto (px)", fontsize=8)
-    ax_b.set_ylabel("F1 de CR-02 sobre el clip", fontsize=8)
-    ax_b.grid(axis="x", visible=False)
-    limpiar_ejes(ax_b)
-    ax_b.set_title("B · la escala sola no ordena", loc="left", fontsize=8.5, pad=7, color=TINTA)
-
-    fig.subplots_adjust(hspace=0.45)
-
-    nota_al_pie(
-        fig,
-        [
-            "Panel A: asociación de chaleco por banda de altura sobre las detecciones crudas de la campaña I1 "
-            "(clips v06 y v10 diurnos, v04 nocturno); el tramo ≥320 px de v10 no fue medido y por eso la serie se corta.",
-            "Panel B: los cuatro clips con referencia humana y Nivel A medido. El de sujetos más grandes rinde F1 0,084 "
-            "por oclusión mutua, no por escala.",
-            "La frontera tiene al menos tres ejes —escala, iluminación y oclusión— y ninguno de los tres, por sí solo, "
-            "predice si el material es evaluable.",
+            bx.annotate(nota, (altura, f1), xytext=desplazamiento, textcoords="offset points",
+                        ha="right" if destacado else "left", va="top" if not destacado else "bottom",
+                        fontsize=9.5, color=t["tinta"] if destacado else t["tinta_2"], linespacing=1.25,
+                        arrowprops=dict(arrowstyle="-", color=t["tinta_3"], lw=1.0, shrinkA=2, shrinkB=7)
+                        if destacado else None)
+    bx.legend(
+        handles=[
+            Line2D([], [], marker="o", linestyle="none", markersize=8, markerfacecolor="none",
+                   markeredgecolor=t["tinta_2"], markeredgewidth=2.0, label="piloto de 12 s"),
+            Line2D([], [], marker="o", linestyle="none", markersize=8, color=t["tinta_2"], label="banco temporal"),
         ],
-        y=-0.10,
-        tam=6.8,
+        loc="upper right", fontsize=9.5, labelcolor=t["tinta_2"], handletextpad=0.3, borderaxespad=0.2,
     )
-
-    salidas = guardar(fig, str(SALIDA))
-    for ruta in salidas:
-        print(f"escrito: {ruta}")
-    print("fuentes: detecciones crudas de la campaña I1 (panel A) · clips con GT humano y Nivel A medido (panel B)")
-    return 0
+    fig.text(0.60, 0.93, "B · la escala sola no ordena el resultado", fontsize=11.5, fontweight="bold",
+             color=t["tinta"], va="center")
+    return fig
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(generar(dibujar, SALIDA))

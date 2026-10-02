@@ -5,7 +5,7 @@ Reglas (ver CONTRIBUTING.md):
   (a) ningún patrón de referencia interna en los .md;
   (b) todo enlace relativo resuelve a un archivo/carpeta del repo;
   (c) toda fila con cifra en resultados/README.md enlaza a results/ o finetuning/;
-  (d) toda imagen referenciada existe.
+  (d) toda imagen referenciada existe, en sintaxis markdown o en <img src>/<source srcset>.
 Uso: python3 herramientas/verificar.py [--raiz DIR] [--json]
 """
 from __future__ import annotations
@@ -79,6 +79,8 @@ def revisar_patrones(raiz: Path) -> list[dict]:
 
 ENLACE = re.compile(r"\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 IMAGEN = re.compile(r"!\[[^\]]*\]\(([^)\s]+)")
+# Las figuras con variante clara y oscura van en <picture>: <img src> y <source srcset>.
+IMAGEN_HTML = re.compile(r"\b(?:src|srcset)=\"([^\"\s]+)")
 _EXTERNO = ("http://", "https://", "mailto:")
 
 
@@ -106,7 +108,7 @@ def revisar_enlaces(raiz: Path) -> list[dict]:
 
 
 def revisar_imagenes(raiz: Path) -> list[dict]:
-    return _revisar_destinos(raiz, IMAGEN, "(d)")
+    return _revisar_destinos(raiz, IMAGEN, "(d)") + _revisar_destinos(raiz, IMAGEN_HTML, "(d)")
 
 
 CIFRA = re.compile(r"\d+,\d+|\bp95\b|\bn\s*=\s*\d")

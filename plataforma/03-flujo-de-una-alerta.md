@@ -1,6 +1,14 @@
 # 3 · De una detección a una alerta notificada
 
-![Máquina de estados del patrón](../evidencia/figuras/fig-e-maquina-de-estados.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../evidencia/figuras/fig-e-maquina-de-estados-oscuro.svg">
+  <img alt="Máquina de estados del patrón: inactive, candidate, confirmed (se emite la alerta), sustained y resolved, con una franja de tiempo de un episodio" src="../evidencia/figuras/fig-e-maquina-de-estados.svg">
+</picture>
+
+**Figura E** (Figura 4.3 del informe). La máquina de cinco estados del motor de patrones y,
+abajo, un episodio en el tiempo, como esquema sin escala. Si la condición ya se cumple con
+el primer evento, el motor salta directo a `confirmed`, tanto al arrancar como al reabrir un
+episodio desde `resolved`.
 
 ## Los pasos
 
@@ -49,10 +57,18 @@ cadena — no es un lote que se procesa después.
 
 ## Qué se ve
 
-![Alerta confirmada sobre el video](../evidencia/figuras/fig-c-alerta-confirmada.png)
+![Fotograma con la alerta confirmada de CR-01 y cuatro llamadas numeradas](../evidencia/figuras/fig-c-alerta-confirmada-anotada.png)
 
-El fotograma (t = 8,5 s) muestra al sujeto con la alerta ya confirmada a los 7,3 s
-—el patrón está en estado sostenido—. Sobre el escritorio hay un casco fuera del
-sujeto; no suprime la alerta porque la condición se evalúa sobre la persona.
+**Figura C** (Figura 4.6 del informe). Un fotograma del clip `a_p1_c04` del rodaje propio,
+a t = 8,5 s, con la alerta ya confirmada —el patrón está en estado sostenido—:
 
-Siguiente: [`04-escenarios-dbe-ebe.md`](04-escenarios-dbe-ebe.md)
+1. el aviso de la alerta de CR-01, de severidad alta, confirmada a los 7,3 s;
+2. la persona, sobre la que se evalúa la condición: lleva chaleco y no lleva casco;
+3. un casco sobre el escritorio, en cuadro pero fuera del sujeto: no suprime la alerta,
+   porque la condición se evalúa sobre la persona;
+4. la línea de tiempo del episodio, de la primera evidencia a la ALERTA.
+
+---
+
+[← 2 · Arquitectura](02-arquitectura.md) · [Inicio](../README.md) ·
+[4 · Dos escenarios →](04-escenarios-dbe-ebe.md)

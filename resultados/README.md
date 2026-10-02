@@ -1,7 +1,14 @@
 # Resultados
 
 Cada cifra enlaza a la página de resultados de donde sale, con su `n` y su material. Los
-números son el dato de una combinación bajo un protocolo, no un aprobado/fallado.
+números son el dato de una combinación bajo un protocolo, no un aprobado/fallado. Si alguna
+difiere de la del informe, manda el informe (sección y tabla).
+
+[La respuesta](#la-respuesta-en-cuatro-números) · [1. Modelo](#1-selección-de-modelo-bench_v3-6477-imágenes) ·
+[2. Formulación](#2-formulación-e-ind-vs-e-dir-vs-e-hyb) · [3. Granularidad](#3-granularidad-escena-vs-sujeto-la-palanca-que-más-agrega) ·
+[4. Tiempo real](#4-el-costo-del-tiempo-real-densidad-de-evidencia) · [5. Obra real](#5-obra-real-no-guionada-13-clips-de-internet) ·
+[6. Distribución](#6-distribución-de-alertas) · [7. Ajuste fino](#7-fine-tuning-acotado-yoloe-26s-jornada-con-protocolo-pre-registrado) ·
+[Limitaciones](#limitaciones-declaradas-l1l8)
 
 ## La respuesta en cuatro números
 
@@ -52,7 +59,21 @@ números son el dato de una combinación bajo un protocolo, no un aprobado/falla
 
 ## 4. El costo del tiempo real (densidad de evidencia)
 
-![Calidad vs densidad](../evidencia/figuras/fig-b-calidad-vs-densidad.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../evidencia/figuras/fig-b-calidad-vs-densidad-oscuro.svg">
+  <img alt="F1 de episodios por escena y por sujeto en cuatro densidades de evidencia, y la ganancia del sujeto con su intervalo de confianza" src="../evidencia/figuras/fig-b-calidad-vs-densidad.svg">
+</picture>
+
+**Figura B.** Ocho campañas sobre los 34 clips del rodaje, con `gdino-tiny-560` y los
+prompts `cr01_cr02_v2_short`; la única variable es el *stride* (1, 7, 15 y 26 sobre 30 fps).
+A la izquierda, el F1 de episodios por escena y por sujeto; a la derecha, la ganancia del
+sujeto con su intervalo de confianza del 95 % (bootstrap pareado por clip), que en las
+cuatro densidades queda a la derecha del cero. La cinta marca las cadencias que sostuvo el
+camino en vivo (medidas entre 1,16 y 4,42 fps). Los clips negativos no entran al F1 —su
+métrica son los falsos positivos, 0 de 4 en las ocho campañas— y no se grafica el SDR, que
+no es comparable entre cadencias; con 34 episodios evaluables, las diferencias de F1
+menores a ~0,02 están dentro de la resolución del banco. Fuente:
+[clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md).
 
 | fps evaluados | Escena F1 | Sujeto F1 | Fuente |
 |---|---|---|---|
@@ -69,7 +90,21 @@ números son el dato de una combinación bajo un protocolo, no un aprobado/falla
 
 ## 5. Obra real no guionada (13 clips de internet)
 
-![Frontera de juzgabilidad](../evidencia/figuras/fig-f-frontera-juzgabilidad.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../evidencia/figuras/fig-f-frontera-juzgabilidad-oscuro.svg">
+  <img alt="Frontera de juzgabilidad: asociación de chaleco por clip y altura del sujeto, y F1 de CR-02 contra la altura mediana" src="../evidencia/figuras/fig-f-frontera-juzgabilidad.svg">
+</picture>
+
+**Figura F.** (A) Asociación de chaleco a cada persona detectada, por clip y por banda de
+altura del sujeto, sobre las detecciones crudas del lote de internet (`v06` y `v10`
+diurnos, `v04` nocturno); la celda vacía no se midió. Al costado, el régimen del rodaje
+propio, con sujetos de 716–839 px de mediana: 96–100 %. (B) F1 de CR-02 a Nivel A contra la
+altura mediana del sujeto en cuatro clips del lote de internet: tres del piloto de 12 s
+—anotados, pero fuera del banco temporal— y `v06_c01`, del banco. El de sujetos más grandes
+rinde 0,084 por oclusión mutua, no por escala. La frontera tiene al menos tres ejes
+—escala, iluminación y oclusión— y ninguno, por sí solo, predice si el material es
+evaluable. Fuente:
+[bench_nivel_a](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/bench_nivel_a/index.md).
 
 | | Escena | Sujeto | Fuente |
 |---|---|---|---|
@@ -78,8 +113,8 @@ números son el dato de una combinación bajo un protocolo, no un aprobado/falla
 | FAR/hora (0,1027 h de soak) | 29,2 | 1.850,8 | [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md) |
 
 - Con n=2 no hay ranking posible entre granularidades; lo robusto es la asimetría de FP (12×).
-  La revisión ciega del GT tumbó 5 de 7 declaraciones de episodio: la calidad del GT es un
-  resultado. La figura F muestra la frontera de juzgabilidad (escala × iluminación × oclusión).
+  La revisión ciega del GT encontró que 5 de las 7 declaraciones de episodio eran errores de
+  anotación: la calidad del GT es un resultado.
 
 ## 6. Distribución de alertas
 
@@ -116,3 +151,8 @@ números son el dato de una combinación bajo un protocolo, no un aprobado/falla
 | **L6** | Tracker sin métricas MOT; en multitud real fragmenta identidades (182 con FP frente a 127 personas) | [results/index.md](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/index.md#limitaciones-declaradas) |
 | **L7** | Licencia parcial de `chv` (20,5 % del bench) | [results/index.md](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/index.md#limitaciones-declaradas) |
 | **L8** | CR-02 a Nivel A no cerrada (un estrato, IC solapados) | [results/index.md](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/index.md#limitaciones-declaradas) |
+
+---
+
+[← Método experimental](../plataforma/05-metodo-experimental.md) · [Inicio](../README.md) ·
+[Mapa de artefactos →](../evidencia/mapa-de-artefactos.md)

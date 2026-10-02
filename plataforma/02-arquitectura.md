@@ -1,6 +1,18 @@
 # 2 · Arquitectura
 
-![Vista de procesos](../evidencia/figuras/fig-a-vista-de-procesos.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="../evidencia/figuras/fig-a-vista-de-procesos-oscuro.svg">
+  <img alt="Vista de procesos de la plataforma" src="../evidencia/figuras/fig-a-vista-de-procesos.svg">
+</picture>
+
+**Figura A** (Figura 4.5 del informe). Los tres servicios, con su puerto, y la consola
+que los gobierna por HTTP. Las detecciones viajan de medios a control por ZeroMQ, y las
+alertas confirmadas, de control a distribución por el canal `:5558`, para salir por MQTT
+QoS 1. Los números marcan el orden de arranque que impone el orquestador —control,
+distribución, medios—, para que el control quede suscripto antes de que los medios emitan;
+la no pérdida de alertas no depende de ese orden, sino del publicador, que espera la
+suscripción del distribuidor. Ninguna línea une un bus con la consola: esa ausencia es una
+frontera de diseño.
 
 ## Tres servicios HTTP config-driven y una consola
 
@@ -53,4 +65,7 @@ compartido, no los archivos en sí. Fuente:
 [`infra/platform/`](https://github.com/simonll4/e-ovrt_experimental-setup/tree/HEAD/infra/platform)
 en `e-ovrt_experimental-setup`.
 
-Siguiente: [`03-flujo-de-una-alerta.md`](03-flujo-de-una-alerta.md)
+---
+
+[← 1 · El problema y el enfoque](01-problema-y-enfoque.md) · [Inicio](../README.md) ·
+[3 · De una detección a una alerta →](03-flujo-de-una-alerta.md)

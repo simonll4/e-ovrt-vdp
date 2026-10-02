@@ -1,24 +1,28 @@
 #!/usr/bin/env python3
-"""FIG-B — Curva de calidad contra densidad de evidencia (§17.5).
+"""FIG-B — La ganancia de la identidad por sujeto sobrevive al tiempo real.
 
-Qué muestra: cuánta calidad de detección de episodios sobrevive cuando la cadencia de
-inferencia baja de la densidad del banco (30 fps, stride 1) a la que el camino live
-puede sostener (1,16-4,42 fps, medidos en el rodaje). Es la figura del **costo del tiempo real**.
+Qué muestra: para cada densidad de evidencia —30 fps del banco y las tres cadencias
+que el camino en vivo sostuvo—, el F1 de episodios con granularidad de escena y de
+sujeto (izquierda), y la ganancia del sujeto con su intervalo de confianza
+(derecha). La lectura que la figura existe para fijar: **la ganancia excluye el cero
+en las cuatro densidades**.
 
-Fuente: los `metrics.json` de las ocho campañas del eje de densidad, leídos del
-artefacto —nunca transcritos de una tabla intermedia— más el `stride` de cada
-`campaign.yaml`. Las cifras resultantes se verifican contra el índice publicado
-(`results/clip_bench/index.md` §Eje de densidad); si divergen, el script falla.
+Fuentes:
+  · F1 por campaña: los `metrics.json` de las ocho campañas del eje de densidad, leídos
+    del artefacto —nunca transcritos— más el `stride` de cada `campaign.yaml`. Se
+    verifican contra el índice publicado (`results/clip_bench/index.md`, eje de
+    densidad); si divergen, el script falla.
+  · Intervalos de la ganancia: bootstrap pareado por clip, publicado en
+    `results/clip_bench/index.md` ("Lo que dicen estas filas"). No hay un artefacto
+    legible por máquina con esos intervalos, así que van transcritos acá; el punto
+    central de cada uno se verifica contra la resta de los F1 medidos.
 
-Dos reglas de lectura que la figura respeta y que su nota al pie debe repetir:
-  · Se grafica F1 de episodios, NUNCA el SDR: el SDR no es comparable entre cadencias
-    (su subida al bajar la densidad es, en la práctica, artefacto del instrumento de
-    medición y no una mejora real).
-  · Los clips negativos no entran a P/R/F1; su métrica son los FP (0/4 en las ocho
-    campañas), y eso se dice en la nota, no se dibuja.
+Reglas de lectura (van en el pie de figura del markdown): se grafica F1 de episodios,
+nunca el SDR, que no es comparable entre cadencias; los clips negativos no entran a
+F1 (su métrica son los falsos positivos: 0 de 4 en las ocho campañas).
 
 Uso:
-    python3 fig_b_calidad_vs_densidad.py  (requiere matplotlib; ver README del directorio)
+    python3 fig_b_calidad_vs_densidad.py  (requiere matplotlib y PyYAML; ver README del directorio)
 """
 
 from __future__ import annotations
@@ -31,21 +35,9 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from estilo import (  # noqa: E402  — fija el backend Agg antes de importar pyplot
-    ANCHO_COLUMNA_IN,
-    AZUL,
-    BANDA,
-    NARANJA,
-    SUPERFICIE,
-    TINTA,
-    TINTA_2,
-    TINTA_3,
-    aplicar_estilo,
-    guardar,
-    limpiar_ejes,
-    nota_al_pie,
-)
+from estilo import ANCHO_IN, coma, con_signo, franjas, generar  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
 
 # Repo hermano `e-ovrt_experimental-setup` clonado al lado por defecto; EOVRT_RESULTS
 # sobrescribe la ubicación de su carpeta `results/` (ver README del directorio).
@@ -56,39 +48,25 @@ SALIDA = Path(__file__).resolve().parents[1] / "fig-b-calidad-vs-densidad"
 
 FPS_NOMINAL = 30.0
 
-# (campaign_dir, ancla que representa) por granularidad. El orden es de menor a mayor
-# densidad para que la serie se dibuje en el sentido del eje.
-SERIES = {
-    "escena": {
-        "color": AZUL,
-        "marcador": "o",
-        "campanas": [
-            ("r5_gdinotiny560_v2short_scene_s26", "peor caso live"),
-            ("r3_gdinotiny560_v2short_scene_s15", "rodaje"),
-            ("r1_gdinotiny560_v2short_scene_s7", "techo live"),
-            ("t1_gdinotiny560_v2short_scene", "referencia DBE"),
-        ],
-    },
-    "sujeto": {
-        "color": NARANJA,
-        "marcador": "s",
-        "campanas": [
-            ("r6_gdinotiny560_v2short_subject_s26", "peor caso live"),
-            ("r4_gdinotiny560_v2short_subject_s15", "rodaje"),
-            ("r2_gdinotiny560_v2short_subject_s7", "techo live"),
-            ("g1_gdinotiny560_v2short_subject", "referencia DBE"),
-        ],
-    },
-}
+# Filas de arriba hacia abajo: de la densidad del banco a la peor cadencia en vivo.
+# (rótulo, descripción, campaña de escena, campaña de sujeto, en vivo)
+FILAS = [
+    ("30 fps", "referencia DBE · stride 1",
+     "t1_gdinotiny560_v2short_scene", "g1_gdinotiny560_v2short_subject", False),
+    ("4,29 fps", "techo en vivo · stride 7",
+     "r1_gdinotiny560_v2short_scene_s7", "r2_gdinotiny560_v2short_subject_s7", True),
+    ("2,00 fps", "lo que corrió el rodaje · stride 15",
+     "r3_gdinotiny560_v2short_scene_s15", "r4_gdinotiny560_v2short_subject_s15", True),
+    ("1,15 fps", "peor caso en vivo · stride 26",
+     "r5_gdinotiny560_v2short_scene_s26", "r6_gdinotiny560_v2short_subject_s26", True),
+]
 
-# Verificación contra el índice publicado (F1 micro de episodios positivos).
-ESPERADO_INDICE = {
-    "escena": [0.646, 0.738, 0.794, 0.789],
-    "sujeto": [0.742, 0.875, 0.866, 0.930],
-}
+# Verificación contra el índice publicado (F1 micro de episodios positivos), por fila.
+ESPERADO_INDICE = [(0.789, 0.930), (0.794, 0.866), (0.738, 0.875), (0.646, 0.742)]
 
-# Banda de cadencia que el camino live sostuvo con hardware real, medida en el rodaje.
-LIVE_MIN, LIVE_MAX = 1.16, 4.42
+# Ganancia sujeto − escena e IC 95 % (bootstrap pareado por clip), transcritos de
+# results/clip_bench/index.md. El punto se verifica contra los F1 medidos.
+GANANCIA_IC = [(0.141, 0.032, 0.258), (0.072, 0.013, 0.145), (0.137, 0.032, 0.258), (0.096, 0.011, 0.202)]
 
 
 def leer_campana(nombre: str) -> tuple[float, float]:
@@ -100,135 +78,111 @@ def leer_campana(nombre: str) -> tuple[float, float]:
     return FPS_NOMINAL / stride, float(metrics["positives"]["f1_micro"])
 
 
-def main() -> int:
-    datos = {}
-    for granularidad, cfg in SERIES.items():
-        puntos = [leer_campana(nombre) for nombre, _ in cfg["campanas"]]
-        datos[granularidad] = puntos
-        medidos = [round(f1, 3) for _, f1 in puntos]
-        if medidos != ESPERADO_INDICE[granularidad]:
-            raise SystemExit(
-                f"FIG-B: {granularidad} midió {medidos} pero el índice publica "
-                f"{ESPERADO_INDICE[granularidad]}. Regenerar el índice o revisar la campaña "
-                "antes de dibujar: la figura no puede contradecir la fuente citable."
-            )
+def leer_y_verificar() -> list[tuple[float, float]]:
+    datos = []
+    for (rotulo, _, escena, sujeto, _), esperado, (ganancia, *_ic) in zip(FILAS, ESPERADO_INDICE, GANANCIA_IC):
+        _, f1_escena = leer_campana(escena)
+        _, f1_sujeto = leer_campana(sujeto)
+        medido = (round(f1_escena, 3), round(f1_sujeto, 3))
+        if medido != esperado:
+            raise SystemExit(f"FIG-B: a {rotulo} se midió {medido} pero el índice publica {esperado}. "
+                             "La figura no puede contradecir la fuente citable.")
+        if round(medido[1] - medido[0], 3) != ganancia:
+            raise SystemExit(f"FIG-B: a {rotulo} la ganancia medida es {medido[1] - medido[0]:.3f} y la "
+                             f"transcrita {ganancia}. Revisar el índice antes de dibujar.")
+        datos.append((f1_escena, f1_sujeto))
+    return datos
 
-    aplicar_estilo()
-    fig, ax = plt.subplots(figsize=(ANCHO_COLUMNA_IN, 3.5))
 
-    # Región donde vive el camino live, anotada como banda (no como línea punteada).
-    ax.axvspan(LIVE_MIN, LIVE_MAX, color=BANDA, zorder=0, lw=0)
-    ax.text(
-        (LIVE_MIN * LIVE_MAX) ** 0.5,
-        0.075,
-        "cadencia sostenible\nen vivo (1,16–4,42 fps)",
-        ha="center",
-        va="bottom",
-        fontsize=7.5,
-        color=TINTA_3,
-        linespacing=1.35,
-    )
+DATOS: list[tuple[float, float]] = []
 
-    for granularidad, cfg in SERIES.items():
-        xs = [p[0] for p in datos[granularidad]]
-        ys = [p[1] for p in datos[granularidad]]
-        ax.plot(
-            xs,
-            ys,
-            color=cfg["color"],
-            marker=cfg["marcador"],
-            label=f"granularidad de {granularidad}",
-            markeredgecolor=SUPERFICIE,  # anillo de 2px sobre marcas superpuestas
-            markeredgewidth=1.4,
-            clip_on=False,
-            zorder=3,
-        )
-        # Etiqueta directa en el extremo de referencia (selectiva, no en cada punto).
-        ax.annotate(
-            f"{granularidad}\n{ys[-1]:.3f}".replace(".", ","),
-            xy=(xs[-1], ys[-1]),
-            xytext=(9, 0),
-            textcoords="offset points",
-            va="center",
-            ha="left",
-            fontsize=8,
-            color=TINTA_2,
-            linespacing=1.3,
-        )
-        # Y el valor en el techo del camino live: es el punto decisión-relevante.
-        idx_techo = 2
-        ax.annotate(
-            f"{ys[idx_techo]:.3f}".replace(".", ","),
-            xy=(xs[idx_techo], ys[idx_techo]),
-            xytext=(0, -13 if granularidad == "escena" else 9),
-            textcoords="offset points",
-            ha="center",
-            fontsize=8,
-            color=cfg["color"],
-            fontweight="bold",
-        )
 
-    ax.set_xscale("log")
-    ax.set_xlim(1.0, 42)
-    ax.set_ylim(0, 1.0)
-    ax.set_ylabel("F1 de episodios (micro)")
-    ax.set_xlabel(
-        "densidad de evidencia (fotogramas inferidos por segundo, escala logarítmica)",
-        labelpad=10,
-    )
+def dibujar(t, tema):
+    fig = plt.figure(figsize=(ANCHO_IN, 4.5))
+    y_filas = [4, 3, 2, 1]
+    ylim = (0.45, 4.65)
+    abajo, alto = 0.13, 0.70
 
-    # Valor y ancla en la MISMA etiqueta de tick. En dos bloques separados el rótulo del
-    # eje queda en el medio y las anclas se leen como si fueran otro eje.
-    ticks = [1.15, 2.0, 4.29, 30.0]
-    # Anclas en dos líneas: a 1,15 y 2,00 fps los ticks quedan cerca en escala
-    # logarítmica y una etiqueta de una línea se solapa con la vecina.
-    anclas = ["peor caso\nlive (×26)", "rodaje\n(×15)", "techo\nlive (×7)", "referencia\nDBE (×1)"]
-    ax.set_xticks(ticks)
-    ax.set_xticklabels(
-        [
-            f"{t:.2f}".replace('.', ',') + f"\n{ancla}" if t < 10 else f"{t:.0f}\n{ancla}"
-            for t, ancla in zip(ticks, anclas)
+    # --- Rótulos de fila ---
+    for y, (rotulo, desc, *_rest) in zip(y_filas, FILAS):
+        yf = abajo + (y - ylim[0]) / (ylim[1] - ylim[0]) * alto
+        fig.text(0.0, yf + 0.025, rotulo, fontsize=12, fontweight="bold", color=t["tinta"], va="center")
+        fig.text(0.0, yf - 0.035, desc, fontsize=9.5, color=t["tinta_2"], va="center")
+
+    # --- Cinta de las cadencias en vivo ---
+    # Sus ejes van en pulgadas (escala 1:1) para que las franjas salgan a 45° en pantalla.
+    ancho_cinta_in, alto_in = 0.12, alto * 4.5
+    cinta = fig.add_axes([0.236, abajo, ancho_cinta_in / ANCHO_IN, alto])
+    cinta.set_xlim(0, ancho_cinta_in)
+    cinta.set_ylim(0, alto_in)
+    cinta.axis("off")
+    a_pulgadas = lambda y: (y - ylim[0]) / (ylim[1] - ylim[0]) * alto_in  # noqa: E731
+    y_ini, y_fin = a_pulgadas(0.6), a_pulgadas(3.4)
+    franjas(cinta, 0, y_ini, ancho_cinta_in, y_fin - y_ini, color=t["sujeto"], fondo=t["fondo"], paso=0.11)
+    fig.text(0.258, abajo + (y_ini + y_fin) / 2 / alto_in * alto, "cadencias en vivo", rotation=90,
+             fontsize=9.5, color=t["tinta_2"], ha="center", va="center")
+
+    # --- Panel izquierdo: escena y sujeto unidos por su brecha ---
+    ax = fig.add_axes([0.28, abajo, 0.385, alto])
+    ax.set_xlim(0.60, 1.00)
+    ax.set_ylim(*ylim)
+    ax.set_xticks([0.6, 0.7, 0.8, 0.9, 1.0])
+    ax.set_xticklabels(["0,6", "0,7", "0,8", "0,9", "1,0"])
+    ax.set_yticks([])
+    ax.grid(axis="x", color=t["grilla"], linewidth=1.0)
+    for lado in ("top", "right", "left"):
+        ax.spines[lado].set_visible(False)
+    ax.spines["bottom"].set_color(t["grilla"])
+    ax.tick_params(axis="x", length=0, pad=6)
+    for y, (f1_escena, f1_sujeto) in zip(y_filas, DATOS):
+        ax.plot([f1_escena, f1_sujeto], [y, y], color=t["tinta_3"], linewidth=2.6, solid_capstyle="round", zorder=2)
+        ax.plot(f1_escena, y, "o", markersize=11, color=t["escena"], markeredgecolor=t["fondo"],
+                markeredgewidth=2.0, zorder=3)
+        ax.plot(f1_sujeto, y, "s", markersize=10, color=t["sujeto"], markeredgecolor=t["fondo"],
+                markeredgewidth=2.0, zorder=3)
+    # Valores sólo en la fila de referencia: el resto está en la tabla de resultados.
+    f1_escena, f1_sujeto = DATOS[0]
+    ax.text(f1_escena - 0.012, 4, coma(f1_escena), ha="right", va="center", fontsize=10, color=t["tinta_2"])
+    ax.text(f1_sujeto + 0.012, 4, coma(f1_sujeto), ha="left", va="center", fontsize=10, color=t["tinta_2"])
+    ax.text(0.0, 1.10, "F1 de episodios", transform=ax.transAxes, fontsize=11, fontweight="bold",
+            color=t["tinta"], va="center")
+    ax.legend(
+        handles=[
+            Line2D([], [], marker="o", linestyle="none", markersize=9, color=t["escena"], label="escena"),
+            Line2D([], [], marker="s", linestyle="none", markersize=8.5, color=t["sujeto"], label="sujeto"),
         ],
-        linespacing=1.6,
-    )
-    ax.set_xticks([], minor=True)
-
-    ax.set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0])
-    ax.set_yticklabels(["0", "0,2", "0,4", "0,6", "0,8", "1,0"])
-    ax.grid(axis="x", visible=False)
-    limpiar_ejes(ax)
-
-    # Sin título ni subtítulo horneados: el epígrafe ("Figura N — …") lo pone el
-    # documento. Duplicarlo dentro de la imagen se lee como descuido de edición.
-    # Sí queda la línea de procedencia: es la regla del proyecto — toda figura de
-    # resultados carga el identificador que la hace verificable por un tercero.
-    ax.legend(loc="lower right", bbox_to_anchor=(1.0, 0.04), handlelength=1.6)
-
-    nota_al_pie(
-        fig,
-        [
-            "Campañas t1/g1 (stride 1) y r1–r6 (strides 7/15/26) sobre el banco de 34 clips del rodaje; modelo "
-            "gdino-tiny-560 y prompts cr01_cr02_v2_short en las ocho, variable única el stride.",
-            "Los clips negativos no entran a F1 —su métrica son los falsos positivos, 0/4 en las ocho campañas— y no "
-            "se grafica el SDR, que no es comparable entre cadencias.",
-            "Con 34 episodios evaluables, las diferencias menores a ~0,02 (escena 4,29 vs 30 fps; sujeto 2,00 vs 4,29) "
-            "están dentro de la resolución del banco y no se leen como orden.",
-        ],
-        y=-0.30,
-        tam=6.8,
+        loc="center left", bbox_to_anchor=(0.36, 1.10), ncol=2, fontsize=10, labelcolor=t["tinta_2"],
+        handletextpad=0.3, columnspacing=1.2, borderaxespad=0,
     )
 
-    salidas = guardar(fig, str(SALIDA))
-    for granularidad in SERIES:
-        pares = ", ".join(
-            f"{fps:.2f} fps → F1 {f1:.3f}" for fps, f1 in datos[granularidad]
-        )
-        print(f"{granularidad}: {pares}")
-    print("verificado contra results/clip_bench/index.md §Eje de densidad")
-    for ruta in salidas:
-        print(f"escrito: {ruta}")
-    return 0
+    # --- Panel derecho: la ganancia y su intervalo; la línea del cero es la lectura ---
+    bx = fig.add_axes([0.715, abajo, 0.115, alto])
+    bx.set_xlim(-0.04, 0.30)
+    bx.set_ylim(*ylim)
+    bx.set_xticks([0.0, 0.1, 0.2, 0.3])
+    bx.set_xticklabels(["0", "0,1", "0,2", "0,3"])
+    bx.set_yticks([])
+    for lado in ("top", "right", "left"):
+        bx.spines[lado].set_visible(False)
+    bx.spines["bottom"].set_color(t["grilla"])
+    bx.tick_params(axis="x", length=0, pad=6)
+    bx.axvline(0.0, color=t["tinta_2"], linewidth=1.3, zorder=1)
+    for y, (ganancia, inferior, superior) in zip(y_filas, GANANCIA_IC):
+        bx.plot([inferior, superior], [y, y], color=t["sujeto"], linewidth=2.6, solid_capstyle="round", zorder=2)
+        bx.plot(ganancia, y, "D", markersize=7.5, color=t["sujeto"], markeredgecolor=t["fondo"],
+                markeredgewidth=1.8, zorder=3)
+        bx.text(1.08, y + 0.13, con_signo(ganancia), transform=bx.get_yaxis_transform(), fontsize=11,
+                fontweight="bold", color=t["tinta"], va="center", ha="left")
+        bx.text(1.08, y - 0.2, f"[{con_signo(inferior)}; {con_signo(superior)}]", transform=bx.get_yaxis_transform(),
+                fontsize=9.5, color=t["tinta_2"], va="center", ha="left")
+    bx.text(0.0, 1.10, "ganancia del sujeto (IC 95 %)", transform=bx.transAxes, fontsize=11,
+            fontweight="bold", color=t["tinta"], va="center")
+    return fig
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    DATOS.extend(leer_y_verificar())
+    for (rotulo, *_rest), (e, s) in zip(FILAS, DATOS):
+        print(f"{rotulo}: escena {e:.3f} · sujeto {s:.3f} · ganancia {s - e:+.3f}")
+    print("verificado contra results/clip_bench/index.md (eje de densidad y ganancias)")
+    raise SystemExit(generar(dibujar, SALIDA))

@@ -39,4 +39,6 @@ sistema contra una referencia humana construida sobre clips de video; y la opera
 vivo, con el bus de eventos, la latencia y el throughput bajo restricciones de tiempo
 real. Ver [`05-metodo-experimental.md`](05-metodo-experimental.md).
 
-Siguiente: [`02-arquitectura.md`](02-arquitectura.md)
+---
+
+[Inicio](../README.md) · [2 · Arquitectura →](02-arquitectura.md)

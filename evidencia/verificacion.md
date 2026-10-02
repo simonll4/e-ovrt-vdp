@@ -1,25 +1,37 @@
-# Verificación: las suites de los cinco repos
+# Verificación: las suites de los cinco repositorios
 
-Corridas el **2026-08-25** en el workspace de desarrollo, con los comandos exactos de abajo.
-No son cifras copiadas de una foto anterior.
+Corridas el **2026-10-02** en el entorno de desarrollo, una después de la otra, con los
+comandos exactos de abajo y sobre el commit de `main` que indica la tabla. Lo que se informa
+es la última línea de cada suite, tal como salió: no se reintentó nada ni se descontó ninguna
+falla.
 
-| Repo / módulo | Comando | Resultado |
-|---|---|---|
-| e-ovrt_datasets | `python3 -m pytest datasets/tests/ -q` (corrió con el `python3` del sistema; no hizo falta el venv de respaldo) | `431 passed in 1.19s` |
-| e-ovrt_media-plane | `.venv/bin/python -m pytest -q` | `665 passed, 5 skipped, 2 warnings in 32.89s` |
-| e-ovrt_control-plane | `.venv/bin/python -m pytest tests/ -q --ignore=tests/labs` | `312 passed, 2 warnings in 5.76s` |
-| e-ovrt_alert-distribution | `.venv/bin/python -m pytest -q` (la integración MQTT real queda deseleccionada por defecto) | `133 passed, 1 deselected, 1 warning in 3.52s` |
-| e-ovrt_experimental-setup — runner | `.venv/bin/python -m pytest tests/ -q` | `88 passed in 0.91s` |
-| e-ovrt_experimental-setup — fine-tuning | `.venv/bin/python -m pytest finetuning/tests/ -q` | `46 passed in 0.89s` |
-| webconsole — backend (BFF) | `cd webconsole/backend && ../../.venv/bin/python -m pytest -q` | `1 failed, 667 passed in 74.62s` |
-| webconsole — frontend | `cd webconsole/frontend && npm test` | `Test Files  55 passed (55)` / `Tests  387 passed (387)` |
-| **Total** | | **2.729 tests pasados** |
+| Repositorio o módulo | Commit | Comando | Resultado |
+|---|---|---|---|
+| e-ovrt_datasets | `9a9fb842` | `python3 -m pytest datasets/tests/ -q` | `431 passed in 1.70s` |
+| e-ovrt_media-plane | `7fabbc9` | `.venv/bin/python -m pytest -q` | `665 passed, 5 skipped, 2 warnings in 41.47s` |
+| e-ovrt_control-plane | `a0f9f89` | `.venv/bin/python -m pytest tests/ -q --ignore=tests/labs` | `312 passed, 2 warnings in 6.68s` |
+| e-ovrt_alert-distribution | `eccd202` | `.venv/bin/python -m pytest -q` | `133 passed, 1 deselected, 1 warning in 4.06s` |
+| e-ovrt_experimental-setup · runner | `a74bb57` | `.venv/bin/python -m pytest tests/ -q` | `88 passed in 1.34s` |
+| e-ovrt_experimental-setup · fine-tuning | `a74bb57` | `.venv/bin/python -m pytest finetuning/tests/ -q` | `46 passed in 1.45s` |
+| webconsole · backend (BFF) | `a74bb57` | `cd webconsole/backend && ../../.venv/bin/python -m pytest -q` | `1 failed, 932 passed in 183.22s` |
+| webconsole · frontend | `a74bb57` | `cd webconsole/frontend && npm test` | `Test Files 76 passed (76)` · `Tests 541 passed (541)` |
+| **Total** | | | **3.148 pruebas pasadas · 1 fallida** |
 
-La única falla del día está en el BFF: `tests/test_stream_proxy.py::test_ws_preview_reenvia_binario`,
-con `concurrent.futures._base.CancelledError` en el cierre del proxy de streaming. No se reintentó
-ni se maquilló; queda anotada tal como salió. Los 5 casos saltados en media-plane y el 1 deseleccionado
-en alert-distribution (la integración MQTT real, que exige un broker vivo) tampoco entran en el total
-de pasados.
+## La falla, tal como salió
 
-Además, este repo se verifica con `python3 herramientas/verificar.py` (reglas de contenido) y
-`python -m pytest herramientas/tests -q` (38 tests del guardián).
+`tests/test_experiment_history.py::test_missing_alert_file_is_not_zero_alerts`, en el BFF:
+`assert 502 == 404`. La prueba borra el archivo de alertas consolidado de un experimento
+histórico y espera un 404; el BFF, ante ese faltante, consulta las alertas en vivo al plano de
+control, y sin ese servicio levantado responde 502. Se reprodujo igual al correrla sola, así que
+no es intermitente. Queda anotada como salió.
+
+La falla que registró la corrida anterior (2026-08-25, en el proxy de streaming del BFF) no se
+repitió. Los 5 casos saltados de media-plane y el caso deseleccionado de alert-distribution —la
+integración MQTT real, que exige un broker vivo— no entran en el total de pasadas.
+
+## Este repositorio
+
+Las reglas de contenido de este repositorio se verifican con
+`python3 herramientas/verificar.py` (cero violaciones) y su guardián tiene sus propias pruebas:
+`python3 -m pytest herramientas/tests -q`. Las reglas están en
+[`CONTRIBUTING.md`](../CONTRIBUTING.md).

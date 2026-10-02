@@ -19,14 +19,18 @@ msgpack sobre el contrato `bus.envelope.v1`, que numera cada evento con un `seq`
 huecos que aparecen en esa secuencia se cuentan como `bus_dropped_events` y degradan
 la corrida; nunca se silencian ni se descuentan de la medición.
 
-El orden de arranque es **inverso al orden en que fluyen los datos**: primero se
-suscribe la distribución, después el plano de control, y recién al final se dispara
-el plano de medios. La razón es que un socket publicador/suscriptor pierde todo lo
-que se publicó antes de que el consumidor se suscriba, así que cada consumidor tiene
-que estar escuchando antes de que su productor emita el primer evento. Advertencia
-de lectura para la figura de vista de procesos: el orden que dibuja —①distribución,
-②control, ③medios— es el operativo vigente, y va en sentido contrario al de la
-detección que termina viajando por la cadena.
+Un socket publicador/suscriptor pierde todo lo que se publicó antes de que el
+consumidor se suscriba, y eso fija el **orden de arranque** que impone el orquestador:
+
+1. **Plano de control.** Arranca primero y queda suscripto a las detecciones antes de
+   que el plano de medios empiece a emitir.
+2. **Distribución.** Arranca segunda porque necesita la identificación de la corrida
+   de control.
+3. **Plano de medios.** Se dispara al final.
+
+La no pérdida de alertas no depende de ese orden: la garantiza el publicador del canal
+de alertas, que espera la suscripción del distribuidor antes de emitir. Es lo que
+numeran ①②③ en la figura de vista de procesos.
 
 ## Hardware real
 
@@ -49,4 +53,7 @@ tramos: un p95 de captura y un p95 de notificación no se encadenan en un solo n
 Las cifras, siempre acompañadas del tamaño de muestra `n` que las respalda, están en
 [`resultados/`](../resultados/README.md).
 
-Siguiente: [`05-metodo-experimental.md`](05-metodo-experimental.md)
+---
+
+[← 3 · De una detección a una alerta](03-flujo-de-una-alerta.md) · [Inicio](../README.md) ·
+[5 · Método experimental →](05-metodo-experimental.md)

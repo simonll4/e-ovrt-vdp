@@ -41,9 +41,9 @@ clips de obra real no guionada tomados de internet. En conjunto suman 32 clips
 positivos y 15 negativos, con 37 episodios de referencia. Esa referencia la
 construye una persona, no un instrumento, y eso convierte su calidad en un
 resultado más de la evaluación: una revisión ciega, hecha después de anotar,
-encontró que 5 de las 7 declaraciones de episodio del lote de internet no
-correspondían a un cambio de estado real, y el banco se corrigió en consecuencia
-antes de reportar. La procedencia completa de cada clip está en
+encontró que 5 de las 7 declaraciones de episodio del lote de internet eran errores
+de anotación por sobre-declarar estados que no resultaban observables, y el banco se
+corrigió en consecuencia antes de reportar. La procedencia completa de cada clip está en
 [`../evidencia/material-de-video.md`](../evidencia/material-de-video.md).
 
 ## Campañas por pregunta de medición
@@ -80,8 +80,12 @@ de lo que exigiría afirmar un límite horario.
 
 **Dos licencias, un mismo criterio de uso.** Grounding DINO se distribuye bajo
 Apache-2.0. YOLOE se distribuye bajo AGPL-3.0 y se usó en esta evaluación como
-contraste medido, descartado con causa cuando el resultado no lo sostuvo. En ningún
-caso se redistribuyen los pesos de los modelos; cada uno se descarga desde su
-fuente original.
+contraste medido, descartado con causa cuando el resultado no lo sostuvo. Los pesos
+preentrenados no se redistribuyen: cada uno se descarga desde su fuente original. Los
+checkpoints propios del ajuste fino, que no se adoptaron, están sólo en la
+[carpeta de evidencia con acceso autorizado](../README.md#evidencia-acceso-autorizado).
 
-Ver los resultados: [`../resultados/README.md`](../resultados/README.md)
+---
+
+[← 4 · Dos escenarios](04-escenarios-dbe-ebe.md) · [Inicio](../README.md) ·
+[Resultados →](../resultados/README.md)

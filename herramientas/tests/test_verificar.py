@@ -117,6 +117,37 @@ def test_imagen_inexistente_falla(tmp_path):
     assert len(v) == 1 and v[0]["regla"].startswith("(d)")
 
 
+# Las figuras con variante clara y oscura se publican con <picture>: el guardián tiene
+# que seguir viendo sus archivos aunque no usen la sintaxis ![](…) de markdown.
+@pytest.mark.parametrize("html", [
+    '<img alt="fig" src="figuras/nada.svg">',
+    '<source media="(prefers-color-scheme: dark)" srcset="figuras/nada-oscuro.svg">',
+])
+def test_imagen_html_inexistente_falla(tmp_path, html):
+    raiz = _repo(tmp_path, {"a.md": html + "\n"})
+    v = verificar.revisar_imagenes(raiz)
+    assert len(v) == 1 and v[0]["regla"].startswith("(d)")
+
+
+def test_picture_con_archivos_existentes_pasa(tmp_path):
+    raiz = _repo(tmp_path, {
+        "figuras/f.svg": "<svg/>",
+        "figuras/f-oscuro.svg": "<svg/>",
+        "a.md": (
+            "<picture>\n"
+            '  <source media="(prefers-color-scheme: dark)" srcset="figuras/f-oscuro.svg">\n'
+            '  <img alt="fig" src="figuras/f.svg">\n'
+            "</picture>\n"
+        ),
+    })
+    assert verificar.revisar_imagenes(raiz) == []
+
+
+def test_imagen_html_externa_se_ignora(tmp_path):
+    raiz = _repo(tmp_path, {"a.md": '<img src="https://img.shields.io/badge/x-y-blue.svg">\n'})
+    assert verificar.revisar_imagenes(raiz) == []
+
+
 RES = "https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md"
 FT = "https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/finetuning/manifests/x.json"
 
