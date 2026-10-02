@@ -105,13 +105,18 @@ python3 -m pytest datasets/tests/ -q
 
 ## Versiones citadas en el informe
 
-Se completa al congelar, con el tag `informe-2026` en cada repositorio. Hasta entonces, los
-enlaces `blob/HEAD/` de este repositorio resuelven a `main`.
+Congeladas el **2026-10-02** con el tag `informe-2026` en cada repositorio: es la versión
+que describe el informe, y la que pasó las suites de
+[`evidencia/verificacion.md`](../evidencia/verificacion.md). Todos los enlaces a código de
+este repositorio apuntan a ese tag, así que siguen mostrando lo mismo aunque `main` avance.
 
-| Repositorio | Rama | Tag | Commit | Fecha |
-|---|---|---|---|---|
-| e-ovrt_media-plane | `main` | `informe-2026` | *(al congelar)* | |
-| e-ovrt_control-plane | `main` | `informe-2026` | | |
-| e-ovrt_alert-distribution | `main` | `informe-2026` | | |
-| e-ovrt_experimental-setup | `main` | `informe-2026` | | |
-| e-ovrt_datasets | `main` | `informe-2026` | | |
+| Repositorio | Tag | Commit | Fecha del commit |
+|---|---|---|---|
+| [e-ovrt_media-plane](https://github.com/simonll4/e-ovrt_media-plane/tree/informe-2026) | `informe-2026` | `7fabbc9` | 2026-09-18 |
+| [e-ovrt_control-plane](https://github.com/Pandulc/e-ovrt_control-plane/tree/informe-2026) | `informe-2026` | `a0f9f89` | 2026-09-18 |
+| [e-ovrt_alert-distribution](https://github.com/simonll4/e-ovrt_alert-distribution/tree/informe-2026) | `informe-2026` | `eccd202` | 2026-09-18 |
+| [e-ovrt_experimental-setup](https://github.com/simonll4/e-ovrt_experimental-setup/tree/informe-2026) | `informe-2026` | `01b0dda` | 2026-10-02 |
+| [e-ovrt_datasets](https://github.com/Pandulc/e-ovrt_datasets/tree/informe-2026) | `informe-2026` | `9a9fb842` | 2026-09-23 |
+
+Para clonar exactamente esa versión, en el bucle de arriba:
+`git clone --branch informe-2026 "https://github.com/$r.git"`.

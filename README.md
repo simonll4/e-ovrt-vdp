@@ -42,10 +42,10 @@ esa ganancia sobrevive a la restricción de tiempo real.
 
 | Pregunta | Dato | Fuente |
 |---|---|---|
-| Qué ve el detector sin entrenar | `gdino-tiny-560`: mAP50 **0,551** sobre 6.477 imágenes de 3 fuentes; `person` y `helmet` sólidas, `vest` débil, `bare_head` sólo en el especialista | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/bench_imagenes/index.md) |
-| Cómo expresar la condición | E-IND supera a E-DIR en los dos niveles; a Nivel B, la precisión de E-DIR (**0,146**, por debajo de 0,5) la descarta como núcleo | [bench_nivel_a](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/bench_nivel_a/index.md) · [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md) |
-| Qué agrega la plataforma | Con las mismas detecciones bit a bit, pasar de escena a sujeto lleva el F1 de alertas de **0,789 a 0,930** | [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md) |
-| Qué sobrevive al tiempo real | La ganancia de la identidad **excluye el cero en las cuatro densidades** medidas (de 30 a 1,15 fps) | [realtime](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/realtime/index.md) |
+| Qué ve el detector sin entrenar | `gdino-tiny-560`: mAP50 **0,551** sobre 6.477 imágenes de 3 fuentes; `person` y `helmet` sólidas, `vest` débil, `bare_head` sólo en el especialista | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
+| Cómo expresar la condición | E-IND supera a E-DIR en los dos niveles; a Nivel B, la precisión de E-DIR (**0,146**, por debajo de 0,5) la descarta como núcleo | [bench_nivel_a](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_nivel_a/index.md) · [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md) |
+| Qué agrega la plataforma | Con las mismas detecciones bit a bit, pasar de escena a sujeto lleva el F1 de alertas de **0,789 a 0,930** | [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md) |
+| Qué sobrevive al tiempo real | La ganancia de la identidad **excluye el cero en las cuatro densidades** medidas (de 30 a 1,15 fps) | [realtime](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/realtime/index.md) |
 
 Cada cifra es el dato de una combinación bajo un protocolo, no un aprobado o un fallado. El
 detalle, con `n`, material y limitaciones declaradas, está en
@@ -87,6 +87,10 @@ completa está en [`plataforma/02-arquitectura.md`](plataforma/02-arquitectura.m
 | [e-ovrt_alert-distribution](https://github.com/simonll4/e-ovrt_alert-distribution) | distribución de alertas confirmadas por MQTT QoS 1 con idempotencia | `:8082` |
 | [e-ovrt_experimental-setup](https://github.com/simonll4/e-ovrt_experimental-setup) | prompts, manifiestos de experimento, **resultados**, consola web, deploy integral, fine-tuning | consola `:8090` |
 | [e-ovrt_datasets](https://github.com/Pandulc/e-ovrt_datasets) | adquisición, conversión y curación de datasets; el banco de imágenes `bench_v3` | — |
+
+La versión que describe el informe está congelada con el tag **`informe-2026`** en los cinco,
+y es la que enlaza este repositorio: commits y fechas en
+[`repositorios/`](repositorios/README.md#versiones-citadas-en-el-informe).
 
 ## Evidencia: acceso autorizado
 

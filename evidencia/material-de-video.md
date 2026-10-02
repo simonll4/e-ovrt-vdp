@@ -18,11 +18,11 @@ Obra real, bloque guionado, con hardware real: una cámara OAK-D Pro PoE y una c
 RTSP, grabadas y recortadas desde la consola. Las personas que aparecen en cuadro son los
 integrantes del proyecto, actuando según un guion. La referencia temporal humana se anotó
 en CVAT en dos pasadas: 34 clips, 34 episodios evaluables. Sus métricas están en
-[`results/clip_bench/`](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md),
+[`results/clip_bench/`](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md),
 y los fotogramas de la figura C salen de este rodaje.
 
 Cada clip de la carpeta con acceso autorizado se verifica contra el SHA-256 que el
-[manifiesto del banco temporal](https://github.com/Pandulc/e-ovrt_datasets/blob/main/datasets/processed/clip_bench/manifest.yaml)
+[manifiesto del banco temporal](https://github.com/Pandulc/e-ovrt_datasets/blob/informe-2026/datasets/processed/clip_bench/manifest.yaml)
 registra para ese clip; el manifiesto, a su vez, tiene su huella congelada en el
 [mapa de artefactos](mapa-de-artefactos.md#1-materiales-congelados-y-su-huella).
 
@@ -66,4 +66,4 @@ oclusión en 6 clips (limitación L3) y sin doble anotación (limitación L2). U
 posterior del lote de internet encontró que 5 de las 7 declaraciones de episodio eran errores
 de anotación por sobre-declarar estados que no resultaban observables, y dejó 2 episodios
 evaluables y 11 clips negativos. Ese resultado está en
-[`results/clip_bench/`](https://github.com/simonll4/e-ovrt_experimental-setup/blob/HEAD/results/clip_bench/index.md).
+[`results/clip_bench/`](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md).

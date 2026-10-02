@@ -62,7 +62,7 @@ consola, el plano de control y la distribución montan el directorio de trabajo
 compartido en la misma ruta absoluta que tiene en la máquina anfitriona, porque los
 contratos entre ellos intercambian rutas de archivo sobre un sistema de archivos
 compartido, no los archivos en sí. Fuente:
-[`infra/platform/`](https://github.com/simonll4/e-ovrt_experimental-setup/tree/HEAD/infra/platform)
+[`infra/platform/`](https://github.com/simonll4/e-ovrt_experimental-setup/tree/informe-2026/infra/platform)
 en `e-ovrt_experimental-setup`.
 
 ---
