@@ -5,6 +5,9 @@ con la plataforma completa levantada en local y el modelo `mock`, sin GPU. Los d
 ven son las corridas reales del repositorio. La consola es cliente HTTP de los tres
 servicios: define, lanza y compara experimentos, y nunca se conecta al bus.
 
+Para leerla: [cómo leer la consola](como-leer.md) (cómo se trabajó, qué aporta cada cosa, equivalencias con el
+código, símbolos con más de un sentido y el vocabulario completo).
+
 ## Plataforma
 
 ![Plataforma](01-plataforma.png)
