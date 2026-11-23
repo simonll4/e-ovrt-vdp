@@ -32,6 +32,20 @@ otras dos. El banco tiene además un manifiesto con la huella (sha256) de cada
 fuente, lo que permite regenerarlo byte a byte a partir de los datos originales y
 verificar que no cambió entre una medición y la siguiente.
 
+**Cada clase se evalúa donde está anotada.** Las tres fuentes no anotan las mismas
+clases: `bench_obra` anota las cuatro, `chv` no anota `bare_head` y `shel5k` no anota
+`vest`. Ninguna alcanza sola, y por eso son tres. Cada estrato se evalúa por separado,
+contra su propia referencia, y una clase que el estrato no anota no cuenta como cero ni
+sus detecciones como falsos positivos: la referencia no puede juzgarlas. Es el criterio
+de los bancos de anotación federada, como LVIS (Gupta et al., 2019). El valor agregado
+de una clase es el promedio de los estratos que la anotan, ponderado por sus cajas de
+referencia, y el mAP50 del banco es la media simple de las cuatro clases. La
+consecuencia hay que tenerla presente al leer: el agregado de `vest` sale casi todo de
+`chv` y el de `bare_head` casi todo de `shel5k`, mientras que `bench_obra` pesa poco en
+cualquier clase. Tampoco se compara el mAP50 de un estrato con el de otro, porque
+promedian clases distintas. La procedencia y las salvedades de cada fuente están en la
+[ficha del banco](https://github.com/Pandulc/e-ovrt_datasets/blob/informe-2026/datasets/registry/bench_v3.md).
+
 ## Banco de clips con referencia temporal humana
 
 **47 clips, con procedencia declarada.** El banco temporal —el material que alimenta

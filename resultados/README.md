@@ -14,7 +14,7 @@ difiere de la del informe, manda el informe (sección y tabla).
 
 | # | Pregunta | Dato | Fuente |
 |---|---|---|---|
-| 1 | Qué ve el detector sin entrenar | `gdino-tiny-560`: mAP50 **0,551** sobre 6.477 imágenes de 3 fuentes; `person`/`helmet` sólidas, `vest` débil, `bare_head` sólo en el especialista | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
+| 1 | Qué ve el detector sin entrenar | `gdino-tiny-560`: mAP50 **0,551** sobre 6.477 imágenes de 3 fuentes; `person`/`helmet` sólidas, `vest` débil, `bare_head` floja: sólo `gdino-base-560` la detecta mejor, y sólo en `shel5k` | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
 | 2 | Cómo expresar la condición | E-IND supera a E-DIR en los dos niveles; a Nivel B la precisión de E-DIR **0,146** (< 0,5) la descarta como núcleo | [bench_nivel_a](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_nivel_a/index.md) · [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md) |
 | 3 | Qué agrega la plataforma | Con las mismas detecciones bit a bit, escena → sujeto lleva el F1 de alertas de **0,789 a 0,930** | [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md) |
 | 4 | Qué sobrevive al tiempo real | La ganancia de la identidad **excluye el cero en las cuatro densidades** medidas (30 → 1,15 fps) | [realtime](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/realtime/index.md) |
@@ -24,10 +24,15 @@ difiere de la del informe, manda el informe (sección y tabla).
 | Modelo | mAP50 `bench_v3` | mAP50 núcleo `bench_obra` (147) | recall CR-01 (n=5.313) | latencia | Fuente |
 |---|---|---|---|---|---|
 | `gdino-tiny-560` (campeón) | **0,551** | **0,503** | 0,308 | **129 ms** | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
-| `gdino-base-560` (especialista CR-02/`bare_head`) | 0,525 | 0,474 | **0,599** | 146 ms | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
+| `gdino-base-560` (contraste) | 0,525 | 0,474 | **0,599** | 146 ms | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
 
 - Por estrato, campeón: `shel5k` (n=5.000) person 0,770 · helmet 0,707 · bare_head 0,133;
   `chv` (n=1.330) vest 0,553. La asimetría por clase es estructural.
+  [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md)
+- El agregado se lee por fuente. Cada clase se evalúa sólo en los estratos que la anotan: el de `vest` sale de
+  `chv` y del núcleo, y el de `bare_head` y el recall CR-01, de `shel5k` y del núcleo. La ventaja de
+  `gdino-base-560` en `bare_head` es de `shel5k` (recall CR-01 0,599 vs 0,308, n=5.313); en el núcleo `bench_obra`
+  casi empatan (0,400 vs 0,369, n=65).
   [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md)
 - Resolución 560 vs 800: −24 % de latencia con igual o mejor mAP.
   [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md)

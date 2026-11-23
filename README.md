@@ -42,7 +42,7 @@ esa ganancia sobrevive a la restricción de tiempo real.
 
 | Pregunta | Dato | Fuente |
 |---|---|---|
-| Qué ve el detector sin entrenar | `gdino-tiny-560`: mAP50 **0,551** sobre 6.477 imágenes de 3 fuentes; `person` y `helmet` sólidas, `vest` débil, `bare_head` sólo en el especialista | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
+| Qué ve el detector sin entrenar | `gdino-tiny-560`: mAP50 **0,551** sobre 6.477 imágenes de 3 fuentes; `person` y `helmet` sólidas, `vest` débil, `bare_head` floja: sólo `gdino-base-560` la detecta mejor, y sólo en `shel5k` | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
 | Cómo expresar la condición | E-IND supera a E-DIR en los dos niveles; a Nivel B, la precisión de E-DIR (**0,146**, por debajo de 0,5) la descarta como núcleo | [bench_nivel_a](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_nivel_a/index.md) · [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md) |
 | Qué agrega la plataforma | Con las mismas detecciones bit a bit, pasar de escena a sujeto lleva el F1 de alertas de **0,789 a 0,930** | [clip_bench](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/clip_bench/index.md) |
 | Qué sobrevive al tiempo real | La ganancia de la identidad **excluye el cero en las cuatro densidades** medidas (de 30 a 1,15 fps) | [realtime](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/realtime/index.md) |
