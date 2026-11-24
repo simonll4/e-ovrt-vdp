@@ -23,10 +23,10 @@ difiere de la del informe, manda el informe (sección y tabla).
 
 | Modelo | mAP50 `bench_v3` | mAP50 núcleo `bench_obra` (147) | recall CR-01 (n=5.313) | latencia | Fuente |
 |---|---|---|---|---|---|
-| `gdino-tiny-560` (campeón) | **0,551** | **0,503** | 0,308 | **129 ms** | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
+| `gdino-tiny-560` (perfil operativo) | **0,551** | **0,503** | 0,308 | **129 ms** | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
 | `gdino-base-560` (contraste) | 0,525 | 0,474 | **0,599** | 146 ms | [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md) |
 
-- Por estrato, campeón: `shel5k` (n=5.000) person 0,770 · helmet 0,707 · bare_head 0,133;
+- Por estrato, `gdino-tiny-560`: `shel5k` (n=5.000) person 0,770 · helmet 0,707 · bare_head 0,133;
   `chv` (n=1.330) vest 0,553. La asimetría por clase es estructural.
   [bench_imagenes](https://github.com/simonll4/e-ovrt_experimental-setup/blob/informe-2026/results/bench_imagenes/index.md)
 - El agregado se lee por fuente. Cada clase se evalúa sólo en los estratos que la anotan: el de `vest` sale de
